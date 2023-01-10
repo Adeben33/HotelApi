@@ -1,6 +1,6 @@
 package main
 
-import "test-va/cmd"
+import "github.com/adeben33/HotelApi/cmd"
 
 func main() {
 	cmd.Setup()
