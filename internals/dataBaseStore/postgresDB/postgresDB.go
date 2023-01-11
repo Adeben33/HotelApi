@@ -1,6 +1,7 @@
 package postgresDB
 
 import (
+	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -15,4 +16,5 @@ func ConnectToDb() {
 	if err != nil {
 		log.Panic("Unable to connect to the database")
 	}
+	fmt.Print("Database connected successfully")
 }
