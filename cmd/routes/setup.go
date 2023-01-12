@@ -13,9 +13,11 @@ import (
 	"time"
 )
 
+var v1 *gin.RouterGroup
+
 func RouteSetup() {
 	r := gin.New()
-	v1 := r.Group("/api/v1")
+	v1 = r.Group("/api/v1")
 
 	// Middlewares
 	v1.Use(gin.Logger())
@@ -31,6 +33,8 @@ func RouteSetup() {
 	v1.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
+
+	v1.POST("/signup")
 
 	//welcome message route
 	v1.GET("/", func(c *gin.Context) {
