@@ -25,7 +25,8 @@ func Setup() {
 	routes.PaymentRoutes(route)
 	routes.ApartmentRoutes(route)
 	routes.BookingRoutes(route)
-	routes.ReviewRoutes(route)
+	routes.ReviewsRoutes(route)
+	routes.DiscountsRoutes(route)
 	//	No Routes
 	route.NoRoute(func(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{
