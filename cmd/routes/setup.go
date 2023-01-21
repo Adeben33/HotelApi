@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"fmt"
+	"github.com/adeben33/HotelApi/cmd/handlers/userHandler"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -34,12 +35,14 @@ func RouteSetup() {
 		c.String(http.StatusOK, "pong")
 	})
 
-	v1.POST("/signup")
+	//SignUp route
+	v1.POST("/signup", userHandler.SignUp)
 
 	//welcome message route
 	v1.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Welcome to Hotel Management Server Backend Server - V1.0.0")
 	})
+
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"name":    "Not Found",

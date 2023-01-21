@@ -7,6 +7,10 @@ import (
 	"log"
 )
 
+type DatabaseServer interface {
+	GetConn() *gorm.DB
+}
+
 type postgresServer struct {
 	conn *gorm.DB
 }
