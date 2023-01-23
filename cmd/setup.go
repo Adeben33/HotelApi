@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-var v1 *gin.RouterGroup
-
 func Setup() {
 
 	_ = mongoDBConnection.MongoDBConnection()
@@ -35,7 +33,7 @@ func Setup() {
 	//routes.DiscountsRoutes(route)
 
 	//ping
-	v1.GET("/ping", func(c *gin.Context) {
+	route.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
 	//	No Routes

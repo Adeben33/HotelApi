@@ -10,7 +10,7 @@ import (
 
 var uri string = "mongodb://localhost:27017"
 
-var client *mongo.Client = MongoDBConnection()
+var Client *mongo.Client = MongoDBConnection()
 
 func MongoDBConnection() *mongo.Client {
 	ctx := context.TODO()
