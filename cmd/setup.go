@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var v1 *gin.RouterGroup
+
 func Setup() {
 	port := os.Getenv("port")
 	if port != "" {
@@ -19,6 +21,7 @@ func Setup() {
 	}
 	//route
 	route := gin.New()
+	//route = route.Group("/api/v1")
 	route.Use(gin.Logger())
 	route.Use(gin.Recovery())
 	routes.UserRoutes(route)
@@ -26,7 +29,12 @@ func Setup() {
 	routes.ApartmentRoutes(route)
 	routes.BookingRoutes(route)
 	routes.ReviewsRoutes(route)
-	routes.DiscountsRoutes(route)
+	//routes.DiscountsRoutes(route)
+
+	//ping
+	v1.GET("/ping", func(c *gin.Context) {
+		c.String(http.StatusOK, "pong")
+	})
 	//	No Routes
 	route.NoRoute(func(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{

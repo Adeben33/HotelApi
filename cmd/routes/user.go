@@ -1,41 +1,41 @@
 package routes
 
 import (
-	"github.com/adeben33/HotelApi/cmd/handlers"
+	"github.com/adeben33/HotelApi/cmd/handlers/userHandler"
 	"github.com/gin-gonic/gin"
 )
 
 func UserRoutes(routes *gin.Engine) {
 	//signup
-	routes.POST("/users/signup", handlers.Signup())
+	routes.POST("/users/signup", userHandler.SignUp)
 	//	login
-	routes.POST("users/login", handlers.Login())
+	routes.POST("users/login", userHandler.handlers.Login())
 	//Returns a new token with a renewed expiration time.
-	routes.POST("users/refresh", handlers.RefreshLogin())
+	routes.POST("users/refresh", userHandler.RefreshLogin())
 
 	//	GET user
-	routes.GET("/users/:userId", handlers.GetUser())
+	routes.GET("/users/:userId", userHandler.GetUser())
 	//	GET all users
-	routes.GET("/users", handlers.GetAllUsers())
+	routes.GET("/users", userHandler.GetAllUsers())
 	//Update an existing user by ID.
-	routes.PUT("/users/:userId", handlers.UpdateUser())
+	routes.PUT("/users/:userId", userHandler.UpdateUser())
 	//Delete an existing user by ID. (Admin Only)
-	routes.DELETE("/users/:userId", handlers.DeleteUser())
+	routes.DELETE("/users/:userId", userHandler.DeleteUser())
 	// Retrieve all bookings for a specific user.
-	routes.GET("/users/:id/bookings", handlers.GetUserBookings())
+	routes.GET("/users/:id/bookings", userHandler.GetUserBookings())
 	//GET Retrieve all properties rented by a specific user.
-	routes.GET("/users/:id/renterProperties", handlers.GetRenterProperties())
+	routes.GET("/users/:id/renterProperties", userHandler.GetRenterProperties())
 	//	Retrieve all properties managed by a specific user.
-	routes.GET("/users/:id/managedProperties", handlers.GetManagedProperties())
+	routes.GET("/users/:id/managedProperties", userHandler.GetManagedProperties())
 	//Retrieve the role of a specific user.
-	routes.GET("/users/:id/role", handlers.GetUserRole())
+	routes.GET("/users/:id/role", userHandler.GetUserRole())
 	//Update the role of a specific user. (Admin Only)
-	routes.PUT("/users/:id/role", handlers.UpdateUserRole())
+	routes.PUT("/users/:id/role", userHandler.UpdateUserRole())
 	//Retrieve the recent bookings for a specific user.
-	routes.GET("/users/:id/recentBookings", handlers.GetRecentBookings())
+	routes.GET("/users/:id/recentBookings", userHandler.GetRecentBookings())
 	//Retrieve the upcoming bookings for a specific user.
-	routes.GET("/users/:id/UpComingBookings", handlers.GetUpcomingBookings())
+	routes.GET("/users/:id/UpComingBookings", userHandler.GetUpcomingBookings())
 	//	Retrieve the booking history for a specific user.
-	routes.GET("/users/:id/BookingHistory", handlers.GetBookingHistory())
+	routes.GET("/users/:id/BookingHistory", userHandler.GetBookingHistory())
 
 }
