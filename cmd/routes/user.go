@@ -14,7 +14,7 @@ func UserRoutes(routes *gin.Engine) {
 	//routes.POST("users/refresh", userHandler.RefreshLogin())
 
 	////	GET user
-	//routes.GET("/users/:userId", userHandler.GetUser())
+	routes.GET("/users/:userId", userHandler.GetUser)
 	////	GET all users
 	//routes.GET("/users", userHandler.GetAllUsers())
 	////Update an existing user by ID.
