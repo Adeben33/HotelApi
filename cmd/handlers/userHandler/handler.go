@@ -109,6 +109,16 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Password"})
 		return
 	}
+	//Check if the user already has a token then the user is alread logged in
+	if userDbDetails.Token != "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user already logged in"})
+		return
+	}
+	if userDbDetails.RefreshToken != "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user already logged in"})
+		return
+	}
+
 	//	generate Token
 	token, refreshToken, err := utils.CreateToken(userDbDetails, secretKey)
 	if err != nil {
