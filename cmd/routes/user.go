@@ -9,7 +9,7 @@ func UserRoutes(routes *gin.Engine) {
 	//signup
 	routes.POST("/users/signup", userHandler.SignUp)
 	//	login
-	//routes.POST("users/login", userHandler.Login())
+	routes.POST("users/login", userHandler.Login)
 	////Returns a new token with a renewed expiration time.
 	//routes.POST("users/refresh", userHandler.RefreshLogin())
 

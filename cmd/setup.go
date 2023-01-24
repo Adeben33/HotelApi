@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/adeben33/HotelApi/cmd/routes"
-	"github.com/adeben33/HotelApi/internals/dataBaseStore/mongoDBConnection"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -15,7 +14,6 @@ import (
 
 func Setup() {
 
-	_ = mongoDBConnection.MongoDBConnection()
 	port := os.Getenv("port")
 	if port != "" {
 		port = ":8080"

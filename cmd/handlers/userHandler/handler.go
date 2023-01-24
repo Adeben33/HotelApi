@@ -17,13 +17,14 @@ import (
 )
 
 var validate = validator.New()
+var secretKey = "Adeniyi"
 
 var userCollection *mongo.Collection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "user")
 
 func SignUp(c *gin.Context) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
-	cancel()
+	defer cancel()
 	//bind the incoming data
 	var user entity.User
 	if err := c.BindJSON(&user); err != nil {
@@ -39,7 +40,7 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	//	check if the email has been in the database
+	//check if the email has been in the database
 	userCount1, err := userCollection.CountDocuments(ctx, bson.M{"email": user.Email})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User counting failed"})
@@ -54,10 +55,11 @@ func SignUp(c *gin.Context) {
 
 	if userCount1 > 0 || userCount2 > 0 {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User already exist in the database"})
+		return
 	}
 
 	user.ID = primitive.NewObjectID()
-	user.UpdatedAt, err = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	harsh, err := utils.HarshPassword(user.Password)
 	if err != nil {
@@ -66,12 +68,57 @@ func SignUp(c *gin.Context) {
 	}
 	user.Password = harsh
 	user.UserId = user.ID.Hex()
-
 	result, InsertErr := userCollection.InsertOne(ctx, user)
 	if InsertErr != nil {
-		msg := fmt.Sprintf("user Item was not created")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+		//msg := fmt.Sprintf("user Item was not created")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": InsertErr.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, result)
+}
+
+func Login(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	//	Get the bind data
+	var user entity.UserLogin
+	var userDbDetails entity.User
+
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//	validate the data
+
+	validateErr := validate.Struct(user)
+	if validateErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Login input not correctly inputed"})
+		return
+	}
+	//	verify if email is in the database
+	findErr := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&userDbDetails)
+	if findErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": findErr.Error()})
+		return
+	}
+
+	//	verify Password
+	err := utils.VerifyPassword(userDbDetails.Password, user.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Password"})
+		return
+	}
+	//	generate Token
+	token, refreshToken, err := utils.CreateToken(userDbDetails, secretKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to create token"})
+		return
+	}
+
+	//	Add token to the database
+	userDbDetails.Token = token
+	userDbDetails.RefreshToken = refreshToken
+	//	return User has logged in
+	c.JSON(http.StatusOK, userDbDetails)
 }
