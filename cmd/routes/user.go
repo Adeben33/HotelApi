@@ -16,8 +16,9 @@ func UserRoutes(routes *gin.Engine) {
 
 	////	GET user
 	routes.GET("/users/:userId", userHandler.GetUser)
-	////	GET all users
-	//routes.GET("/users", userHandler.GetAllUsers())
+	//	GET all users
+	routes.GET("/users", userHandler.GetAllUsers)
+
 	////Update an existing user by ID.
 	//routes.PUT("/users/:userId", userHandler.UpdateUser())
 	////Delete an existing user by ID. (Admin Only)

@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/http"
 	"time"
@@ -173,4 +174,86 @@ func FakeUsers(c *gin.Context) {
 		userCollection.InsertOne(ctx, user)
 	}
 	c.JSON(http.StatusOK, gin.H{"success": "success"})
+}
+
+func GetAllUsers(c *gin.Context) {
+	var users []entity.User
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+
+	filter := bson.M{}
+	findOptions := options.Find()
+
+	//This is used to search in the database with respect to the given search details
+	if search := c.Query("search"); search != " " {
+		filter = bson.M{
+			"$or": []bson.M{{
+				"firstName": bson.M{
+					"$regex": primitive.Regex{
+						Pattern: search,
+						Options: "i",
+					},
+				},
+			},
+				{
+					"lastName": bson.M{
+						"$regex": primitive.Regex{
+							Pattern: search,
+							Options: "i",
+						},
+					},
+				},
+				{
+					"Address": bson.M{
+						"$regex": primitive.Regex{
+							Pattern: search,
+							Options: "i",
+						},
+					},
+				},
+				{
+					"email": bson.M{
+						"$regex": primitive.Regex{
+							Pattern: search,
+							Options: "i",
+						},
+					},
+				},
+				{
+					"userId": bson.M{
+						"$regex": primitive.Regex{
+							Pattern: search,
+							Options: "i",
+						},
+					},
+				},
+			},
+		}
+	}
+
+	//Sorting
+	if sort := c.Query("sort"); sort != " " {
+		if sort == "asc" {
+			findOptions.SetSort(bson.M{
+				"userId": 1,
+			})
+		} else if sort = c.Query("sort"); sort == "desc" {
+			findOptions.SetSort(bson.M{
+				"userId": -1,
+			})
+		}
+	}
+
+	cursor, err := userCollection.Find(ctx, filter, findOptions)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error in getting data"})
+		return
+	}
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		var user entity.User
+		cursor.Decode(&user)
+		users = append(users, user)
+	}
+	c.JSON(http.StatusOK, users)
 }
