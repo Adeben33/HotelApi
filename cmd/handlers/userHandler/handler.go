@@ -244,6 +244,12 @@ func GetAllUsers(c *gin.Context) {
 		}
 	}
 
+	var perPage int64 = 9
+	page := 1
+	skipingLimit := (int64(page - 1)) * perPage
+	findOptions = findOptions.SetLimit(perPage)
+	findOptions = findOptions.SetSkip(skipingLimit)
+
 	cursor, err := userCollection.Find(ctx, filter, findOptions)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error in getting data"})
