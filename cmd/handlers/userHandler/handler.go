@@ -24,6 +24,7 @@ var validate = validator.New()
 var secretKey = "Adeniyi"
 
 var userCollection *mongo.Collection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "user")
+var bookingCollection *mongo.Collection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "bookings")
 
 func SignUp(c *gin.Context) {
 
@@ -360,4 +361,32 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, deleteResult)
+}
+
+func GetUserBookings(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	userId := c.Param("userId")
+	var user entity.User
+	//	get the user from the database
+	filter := bson.M{"userId": userId}
+	err := userCollection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while decoding user"})
+	}
+	//getting the user bookingId
+	//the booking Id is a slice
+	var userBookings []entity.Bookings
+	ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	for _, bookingId := range user.Bookings {
+		var userBooking entity.Bookings
+		filter := bson.M{"bookingId": bookingId}
+		err = bookingCollection.FindOne(ctx, filter).Decode(&userBooking)
+		if err != nil {
+			panic(err)
+		}
+		userBookings = append(userBookings, userBooking)
+	}
+	defer cancel()
+	c.JSON(http.StatusOK, userBookings)
 }
