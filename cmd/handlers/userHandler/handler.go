@@ -16,6 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -182,6 +183,7 @@ func GetAllUsers(c *gin.Context) {
 	defer cancel()
 
 	filter := bson.M{}
+	count, _ := userCollection.CountDocuments(ctx, filter)
 	findOptions := options.Find()
 
 	//This is used to search in the database with respect to the given search details
@@ -245,7 +247,11 @@ func GetAllUsers(c *gin.Context) {
 	}
 
 	var perPage int64 = 9
-	page := 1
+	page, _ := strconv.Atoi(c.Query("page"))
+
+	if page < 1 {
+		page = 1
+	}
 	skipingLimit := (int64(page - 1)) * perPage
 	findOptions = findOptions.SetLimit(perPage)
 	findOptions = findOptions.SetSkip(skipingLimit)
@@ -261,5 +267,84 @@ func GetAllUsers(c *gin.Context) {
 		cursor.Decode(&user)
 		users = append(users, user)
 	}
-	c.JSON(http.StatusOK, users)
+	searchCount, _ := userCollection.CountDocuments(ctx, filter)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":           users,
+		"All data count": count,
+		"Search Count":   searchCount,
+		"page":           page,
+	})
+}
+
+func UpdateUser(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var user entity.User
+	var databaseUser entity.User
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error binding data"})
+		return
+	}
+	validateErr := validate.Struct(&user)
+	if validateErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error in the inputted data"})
+		return
+	}
+	//	get the user from the data base
+	filter := bson.M{"userId": "userId"}
+	//Check if the user is in the database
+	count, _ := userCollection.CountDocuments(ctx, filter)
+	if count > 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "The user does not exist in the database"})
+	}
+
+	err := userCollection.FindOne(ctx, filter).Decode(&databaseUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error decoding user in the database"})
+	}
+
+	//	Replacing each value
+	var updatedUser primitive.D
+
+	//	checks
+	if user.FirstName != " " {
+		updatedUser = append(updatedUser, bson.E{"firstName", user.FirstName})
+	}
+
+	if user.LastName != " " {
+		updatedUser = append(updatedUser, bson.E{"firstName", user.FirstName})
+	}
+
+	if user.Email != " " {
+		updatedUser = append(updatedUser, bson.E{"email", user.Email})
+	}
+
+	if user.Phone != " " {
+		updatedUser = append(updatedUser, bson.E{"phone", user.Phone})
+	}
+
+	if user.Address != nil {
+		updatedUser = append(updatedUser, bson.E{"Address", user.Address})
+	}
+
+	if user.RenterProperties != nil {
+		updatedUser = append(updatedUser, bson.E{"renterProperties", user.RenterProperties})
+	}
+
+	user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+
+	updatedUser = append(updatedUser, bson.E{"updatedAt", user.UpdatedAt})
+
+	upsert := true
+	opts := options.UpdateOptions{
+		Upsert: &upsert,
+	}
+
+	result, err := userCollection.UpdateOne(ctx, filter, updatedUser, &opts)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error updating user"})
+	}
+	c.JSON(http.StatusOK, result)
+
 }
