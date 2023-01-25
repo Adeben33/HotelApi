@@ -173,6 +173,8 @@ func FakeUsers(c *gin.Context) {
 		user.Email = gofakeit.Email()
 		user.Phone = fake.Phone().E164Number()
 		user.Password, _ = utils.HarshPassword(password)
+		user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		userCollection.InsertOne(ctx, user)
 	}
 	c.JSON(http.StatusOK, gin.H{"success": "success"})

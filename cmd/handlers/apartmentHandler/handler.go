@@ -6,8 +6,10 @@ import (
 	"github.com/adeben33/HotelApi/internals/entity"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/jaswdr/faker"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"math/rand"
 	"net/http"
 	"time"
 )
@@ -53,4 +55,26 @@ func CreateApartment(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, apartment)
+}
+
+func FakeApartment(c *gin.Context) {
+	//	This is to create a set of apartment
+	//ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	//defer cancel()
+	//var users []entity.User
+	fake := faker.New()
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	for i := 0; i <= 50; i++ {
+		var apartment entity.Apartment
+		apartment.ID = primitive.NewObjectID()
+		apartment.ApartmentId = apartment.ID.Hex()
+		apartment.Name = fake.Person().FirstName() + " Hotel"
+		apartment.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		apartment.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		apartment.NumberofRooms = uint8(rand.Intn(6))
+		apartment.Price = uint16(rand.Intn(10000))
+		apartmentCollection.InsertOne(ctx, apartment)
+	}
+	defer cancel()
+	c.JSON(http.StatusOK, gin.H{"success": "success"})
 }
