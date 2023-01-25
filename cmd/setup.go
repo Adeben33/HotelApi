@@ -23,6 +23,7 @@ func Setup() {
 	//route = route.Group("/api/v1")
 	route.Use(gin.Logger())
 	route.Use(gin.Recovery())
+	//route.Use(cors.New())
 	routes.UserRoutes(route)
 	routes.PaymentRoutes(route)
 	routes.ApartmentRoutes(route)

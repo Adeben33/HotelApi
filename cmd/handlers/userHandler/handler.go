@@ -6,8 +6,10 @@ import (
 	"github.com/adeben33/HotelApi/internals/dataBaseStore/mongoDBConnection"
 	"github.com/adeben33/HotelApi/internals/entity"
 	"github.com/adeben33/HotelApi/utils"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/jaswdr/faker"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -138,6 +140,7 @@ func GetUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 	var user entity.User
+
 	filter := bson.M{"userId": userId}
 	findErr := userCollection.FindOne(ctx, filter).Decode(&user)
 	if findErr != nil {
@@ -145,4 +148,29 @@ func GetUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
+}
+
+func FakeUsers(c *gin.Context) {
+	//	This is to create a set of users with password
+	//ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	//defer cancel()
+	//var users []entity.User
+	role := c.Param("role")
+	password := c.Param("password")
+	fake := faker.New()
+	for i := 0; i <= 50; i++ {
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		var user entity.User
+		user.ID = primitive.NewObjectID()
+		user.UserId = user.ID.Hex()
+		user.FirstName = fake.Person().FirstName()
+		user.LastName = fake.Person().LastName()
+		user.Role = role
+		user.Email = gofakeit.Email()
+		user.Phone = fake.Phone().E164Number()
+		user.Password, _ = utils.HarshPassword(password)
+		userCollection.InsertOne(ctx, user)
+	}
+	c.JSON(http.StatusOK, gin.H{"success": "success"})
 }
