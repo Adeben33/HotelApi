@@ -22,8 +22,8 @@ func UserRoutes(routes *gin.Engine) {
 	//Update an existing user by ID.
 	routes.PUT("/users/:userId", userHandler.UpdateUser)
 	////Delete an existing user by ID. (Admin Only)
-	//routes.DELETE("/users/:userId", userHandler.DeleteUser())
-	//// Retrieve all bookings for a specific user.
+	routes.DELETE("/users/:userId", userHandler.DeleteUser)
+	// Retrieve all bookings for a specific user.
 	//routes.GET("/users/:id/bookings", userHandler.GetUserBookings())
 	////GET Retrieve all properties rented by a specific user.
 	//routes.GET("/users/:id/renterProperties", userHandler.GetRenterProperties())

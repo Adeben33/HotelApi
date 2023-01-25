@@ -280,8 +280,10 @@ func GetAllUsers(c *gin.Context) {
 func UpdateUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
-	var user entity.User
-	var databaseUser entity.User
+	var user entity.UpdateUserStruct
+	userId := c.Param("userId")
+
+	//var databaseUser entity.User
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error binding data"})
 		return
@@ -292,16 +294,13 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	//	get the user from the data base
-	filter := bson.M{"userId": "userId"}
+	filter := bson.M{"userId": userId}
 	//Check if the user is in the database
 	count, _ := userCollection.CountDocuments(ctx, filter)
-	if count > 0 {
+	if count < 0 {
+		fmt.Println(count)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "The user does not exist in the database"})
-	}
-
-	err := userCollection.FindOne(ctx, filter).Decode(&databaseUser)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error decoding user in the database"})
+		return
 	}
 
 	//	Replacing each value
@@ -309,11 +308,11 @@ func UpdateUser(c *gin.Context) {
 
 	//	checks
 	if user.FirstName != " " {
-		updatedUser = append(updatedUser, bson.E{"firstName", user.FirstName})
+		updatedUser = append(updatedUser, bson.E{"first_name", user.FirstName})
 	}
 
 	if user.LastName != " " {
-		updatedUser = append(updatedUser, bson.E{"firstName", user.FirstName})
+		updatedUser = append(updatedUser, bson.E{"last_name", user.LastName})
 	}
 
 	if user.Email != " " {
@@ -329,7 +328,7 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	if user.RenterProperties != nil {
-		updatedUser = append(updatedUser, bson.E{"renterProperties", user.RenterProperties})
+		updatedUser = append(updatedUser, bson.E{"renter_properties", user.RenterProperties})
 	}
 
 	user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -341,10 +340,24 @@ func UpdateUser(c *gin.Context) {
 		Upsert: &upsert,
 	}
 
-	result, err := userCollection.UpdateOne(ctx, filter, updatedUser, &opts)
+	result, err := userCollection.UpdateOne(ctx, filter, bson.D{{"$set", updatedUser}}, &opts)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error updating user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	c.JSON(http.StatusOK, result)
 
+}
+
+func DeleteUser(c *gin.Context) {
+	userId := c.Param("userId")
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	filter := bson.M{"userId": userId}
+	deleteResult, err := userCollection.DeleteOne(ctx, filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, deleteResult)
 }
