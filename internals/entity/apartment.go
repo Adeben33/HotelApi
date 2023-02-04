@@ -16,7 +16,7 @@ type Apartment struct {
 	Review        []string           `json:"review" bson:"review" validate:"omitempty"`
 	CreatedAt     time.Time          `json:"createdAt" bson:"created_at"`
 	UpdatedAt     time.Time          `json:"updatedAt" bson:"updated_at"`
-	BookingsId    []string           `json:"bookings" bson:"bookings" validate:"omitempty"`
+	BookingsId    []string           `json:"bookingsId" bson:"bookings_id" validate:"omitempty"`
 	RenterId      string             `json:"renterId" bson:"renter_id"`
 	ApartmentId   string             `json:"apartmentId" bson:"apartment_id"`
 }

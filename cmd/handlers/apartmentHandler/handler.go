@@ -9,8 +9,10 @@ import (
 	"github.com/jaswdr/faker"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -31,6 +33,105 @@ func GetApartment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, apartment)
+}
+
+func GetAllApartment(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var apartments []entity.ApartmentRes
+
+	filter := bson.M{}
+	count, countErr := apartmentCollection.CountDocuments(ctx, filter)
+	if countErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": countErr.Error()})
+		return
+	}
+	findOption := options.Find()
+
+	//search querry, this can contain apartment names, amenities and so on
+
+	search := c.Query("search")
+	location := c.Query("location")
+
+	if search != " " || location != " " {
+		filter = bson.M{
+			"$or": []bson.M{
+				{"name": bson.M{
+					"$regex": primitive.Regex{
+						Pattern: search,
+						Options: "i",
+					},
+				}},
+				{"apartment_id": bson.M{
+					"$regex": primitive.Regex{
+						Pattern: search,
+						Options: "i",
+					},
+				}},
+				{"address": bson.M{
+					"$regex": primitive.Regex{
+						Pattern: search,
+						Options: "i",
+					},
+				}},
+				{"address": bson.M{
+					"$regex": primitive.Regex{
+						Pattern: location,
+						Options: "i",
+					},
+				}},
+			},
+		}
+	}
+
+	//Sort
+	sort := c.Query("sort")
+
+	if sort != " " {
+		if sort == "asc" {
+			findOption.SetSort(
+				bson.M{
+					"apartment_id": 1,
+				})
+		} else if sort == "desc" {
+			findOption.SetSort(bson.M{
+				"apartment_id": -1,
+			})
+		}
+	}
+
+	var perPage int64 = 9
+	page, _ := strconv.Atoi(c.Query("page"))
+
+	if page < 1 {
+		page = 1
+	}
+
+	skippingLimit := int64(page-1) * perPage
+	findOption.SetSkip(skippingLimit)
+	findOption.SetLimit(perPage)
+
+	cursor, findErr := apartmentCollection.Find(ctx, filter, findOption)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+	}
+
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var apartment entity.ApartmentRes
+		cursor.Decode(&apartment)
+		apartments = append(apartments, apartment)
+	}
+
+	searchCount, _ := apartmentCollection.CountDocuments(ctx, filter)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":           apartments,
+		"All data count": count,
+		"Search Count":   searchCount,
+		"page":           page,
+	})
 }
 
 func CreateApartment(c *gin.Context) {

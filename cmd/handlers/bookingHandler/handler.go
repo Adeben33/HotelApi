@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
 	"time"
 )
@@ -30,7 +31,7 @@ func GetBookings(c *gin.Context) {
 		return
 	}
 	defer cursor.Close(ctx)
-	if cursor.Next(ctx) {
+	for cursor.Next(ctx) {
 		var booking entity.Bookings
 		cursor.Decode(&booking)
 		bookings = append(bookings, booking)
@@ -74,12 +75,6 @@ func CreateBooking(c *gin.Context) {
 	//	check if the apartment is already booked and also how many days is it booked for
 	//using the apartmentID in the booking struct to find the apartment details
 
-	//findingErr := apartmentCollection.FindOne(ctx, bson.D{{"apartment_id", booking.ApartmentId}}).Decode(&apartment)
-	//if findingErr != nil {
-	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Associated apartment not found"})
-	//	return
-	//}
-
 	if !utils.CheckAvailability(booking.ApartmentId, booking.StartDate, booking.EndDate) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Dates are not available"})
 		return
@@ -93,6 +88,19 @@ func CreateBooking(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": insertEr.Error()})
 		return
 	}
+	opts := options.Update().SetUpsert(true)
+	filter := bson.D{{"apartment_id", booking.ApartmentId}}
+	update := bson.D{
+		{"$push", bson.D{
+			{"bookings_id", booking.BookingsId},
+		}},
+	}
+	_, updateErr := apartmentCollection.UpdateOne(ctx, filter, update, opts)
+	if updateErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": updateErr.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, result)
+
 }
