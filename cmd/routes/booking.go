@@ -8,7 +8,7 @@ import (
 func BookingRoutes(route *gin.Engine) {
 	route.GET("/bookings", bookingHandler.GetBookings)
 	//route.GET("/bookings/:id", bookingHandler.GetBookingbyId())
-	//route.POST("/bookings", bookingHandler.CreateBookings())
+	route.POST("/bookings", bookingHandler.CreateBooking)
 	//route.PUT("/bookings/:id", bookingHandler.UpdateBooking())
 	//route.DELETE("/bookings/:id",bookingHandler.DeleteBooking)
 	////Retrieve the apartment associated with a specific booking.
