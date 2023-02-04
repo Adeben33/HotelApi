@@ -8,6 +8,7 @@ import (
 	"github.com/adeben33/HotelApi/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"time"
@@ -18,7 +19,33 @@ var apartmentCollection = mongoDBConnection.OpenCollection(mongoDBConnection.Cli
 var bookingCollection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "booking")
 
 func GetBookings(c *gin.Context) {
+	var bookings []entity.Bookings
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+
+	//	get the booking
+	cursor, findErr := bookingCollection.Find(ctx, bson.M{})
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error finding bookings"})
+		return
+	}
+	defer cursor.Close(ctx)
+	if cursor.Next(ctx) {
+		var booking entity.Bookings
+		cursor.Decode(&booking)
+		bookings = append(bookings, booking)
+	}
+
+	c.JSON(http.StatusOK, bookings)
+}
+
+func GetBookingById(c *gin.Context) {
 	var booking entity.Bookings
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+
+	//booking id
+	bookingId := c.Param("bookingId")
 
 }
 
