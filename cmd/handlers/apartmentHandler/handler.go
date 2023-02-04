@@ -17,7 +17,20 @@ import (
 var validate = validator.New()
 var apartmentCollection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "apartment")
 
-func GetAllApartment(c *gin.Context) {
+func GetApartment(c *gin.Context) {
+	var apartment entity.ApartmentRes
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	apartmentId := c.Param("apartmentId")
+	filter := bson.M{"apartment_id": apartmentId}
+
+	findErr := apartmentCollection.FindOne(ctx, filter).Decode(apartment)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, apartment)
 }
 
 func CreateApartment(c *gin.Context) {

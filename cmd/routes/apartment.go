@@ -6,8 +6,8 @@ import (
 )
 
 func ApartmentRoutes(route *gin.Engine) {
-	route.GET("/apartments", apartmentHandler.GetAllApartment)
-	//route.GET("/apartments/:id", apartmentHandler.GetApartment())
+	//route.GET("/apartments", apartmentHandler.GetAllApartment)
+	route.GET("/apartments/:apartmentId", apartmentHandler.GetApartment)
 	route.POST("/apartments", apartmentHandler.CreateApartment)
 
 	//Fake apartment creator
