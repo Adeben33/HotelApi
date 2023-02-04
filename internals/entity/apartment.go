@@ -21,6 +21,8 @@ type Apartment struct {
 	ApartmentId   string             `json:"apartmentId" bson:"apartment_id"`
 }
 
+//RenterId is someone who is currently occupying the apartment
+
 type AddressInfo struct {
 	Street string `json:"street" bson:"street" validate:"required"`
 	City   string `json:"city" bson:"city" validate:"required"`

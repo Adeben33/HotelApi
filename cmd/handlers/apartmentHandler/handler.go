@@ -18,6 +18,7 @@ import (
 
 var validate = validator.New()
 var apartmentCollection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "apartment")
+var reviewCollection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "review")
 
 func GetApartment(c *gin.Context) {
 	var apartment entity.ApartmentRes
@@ -233,4 +234,37 @@ func GetAllApartmentWithAmenities(c *gin.Context) {
 
 	c.JSON(http.StatusOK, results)
 
+}
+
+func GetAllReviews(c *gin.Context) {
+	var reviews []entity.ReviewsRes
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	apartmentId := c.Param("apartmentId")
+
+	//	review in the apartment struct contains reviewId related to a specific apartment
+	//All reviews have apartmentId in their struct
+	filter := bson.M{"apartment_id": apartmentId}
+
+	cursor, findErr := reviewCollection.Find(ctx, filter)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": findErr.Error()})
+		return
+	}
+
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var review entity.ReviewsRes
+		cursor.Decode(&review)
+		reviews = append(reviews, review)
+	}
+
+	c.JSON(http.StatusOK, reviews)
+
+}
+
+func GetRentedApartment(c *gin.Context) {
+	ctx, cancel := context.
+		c.Param("userId")
 }

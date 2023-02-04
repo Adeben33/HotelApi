@@ -18,10 +18,12 @@ func ApartmentRoutes(route *gin.Engine) {
 
 	//Retreive a list of apartments with specific amenities (?amenities=amenities1,amenities2,amenities3...)
 	route.GET("/apartments", apartmentHandler.GetAllApartmentWithAmenities)
-	////retrive all reviews for a specific apartment
-	//route.POST("/apartmemts/:id/reviews", apartmentHandler.GetAllReviews())
-	////	Retrieve a list of apartments rented by a specific user
-	//route.GET("/apartments", apartmentHandler.GetRentedApartment())
+
+	//retrive all reviews for a specific apartment
+	route.GET("/apartments/:apartmentId/reviews", apartmentHandler.GetAllReviews)
+
+	//	Retrieve a list of apartments rented by a specific user
+	route.GET("/apartments", apartmentHandler.GetRentedApartment)
 	////	Retrieve a list of apartments within a specific price range.
 	//route.GET("/apartments", apartmentHandler.GetApartmentWithPrice())
 	////Retrieve a list of apartments with a specific number of bedrooms.

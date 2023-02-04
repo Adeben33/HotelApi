@@ -1,11 +1,15 @@
 package entity
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
 type Reviews struct {
-	ID          primitive.ObjectID
-	ApartmentId primitive.ObjectID
-	UserId      primitive.ObjectID
-	Rating      uint8
-	Review      string
+	ID          string `bson:"_id" json:"_id"`
+	ApartmentId string `bson:"apartment_id" json:"apartmentId"`
+	UserId      string `json:"userId" bson:"user_id"`
+	Rating      uint8  `json:"rating" bson:"rating"`
+	ReviewId    string `json:"review" bson:"review"`
+}
+
+type ReviewsRes struct {
+	Rating   uint8  `json:"rating" bson:"rating"`
+	Review   string `json:"review" bson:"review"`
+	ReviewId string `json:"reviewId" bson:"review_id"`
 }
