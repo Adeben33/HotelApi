@@ -47,6 +47,12 @@ func GetBookingById(c *gin.Context) {
 	//booking id
 	bookingId := c.Param("bookingId")
 
+	findErr := bookingCollection.FindOne(ctx, bson.M{"booking_id": bookingId}).Decode(&booking)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, findErr.Error())
+		return
+	}
+	c.JSON(http.StatusOK, booking)
 }
 
 func CreateBooking(c *gin.Context) {

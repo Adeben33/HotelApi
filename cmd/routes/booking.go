@@ -7,7 +7,7 @@ import (
 
 func BookingRoutes(route *gin.Engine) {
 	route.GET("/bookings", bookingHandler.GetBookings)
-	route.GET("/bookings/:id", bookingHandler.GetBookingbyId)
+	route.GET("/bookings/:id", bookingHandler.GetBookingById)
 	route.POST("/bookings", bookingHandler.CreateBooking)
 	//route.PUT("/bookings/:id", bookingHandler.UpdateBooking())
 	//route.DELETE("/bookings/:id",bookingHandler.DeleteBooking)
