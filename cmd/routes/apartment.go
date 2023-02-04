@@ -13,11 +13,11 @@ func ApartmentRoutes(route *gin.Engine) {
 	//Fake apartment creator
 	route.GET("/apartments/fake", apartmentHandler.FakeApartment)
 
-	route.PUT("/apartments/:id", apartmentHandler.UpdateApartment)
+	//route.PUT("/apartments/:id", apartmentHandler.UpdateApartment)
 	//route.DELETE("/apartment/:id", apartmentHandler.DeleteApartment)
 
-	////Retreive a list of apartments with specific amenities
-	//route.GET("/apartments", apartmentHandler.GetAllApartmentWithAmenities())
+	//Retreive a list of apartments with specific amenities (?amenities=amenities1,amenities2,amenities3...)
+	route.GET("/apartments", apartmentHandler.GetAllApartmentWithAmenities)
 	////retrive all reviews for a specific apartment
 	//route.POST("/apartmemts/:id/reviews", apartmentHandler.GetAllReviews())
 	////	Retrieve a list of apartments rented by a specific user

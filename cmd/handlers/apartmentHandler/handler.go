@@ -192,3 +192,45 @@ func FakeApartment(c *gin.Context) {
 	defer cancel()
 	c.JSON(http.StatusOK, gin.H{"success": "success"})
 }
+
+func GetAllApartmentWithAmenities(c *gin.Context) {
+	var amenities []string
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	if v, ok := c.GetQueryArray("amenities"); ok {
+		amenities = v
+	}
+
+	//the in operator would be used here
+	filter := bson.M{"amenities": bson.M{"$in": amenities}}
+
+	//pagination will be added because the apartment might be too large
+
+	findOptions := options.Find()
+
+	page, _ := strconv.Atoi(c.Param("page"))
+	if page < 0 {
+		page = 1
+	}
+	var perPage int64 = 9
+	skippingLimit := int64(page-1) * perPage
+
+	findOptions.SetSkip(skippingLimit)
+	findOptions.SetLimit(perPage)
+
+	cursor, findErr := apartmentCollection.Find(ctx, filter, findOptions)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		return
+	}
+
+	var results []bson.M
+	err := cursor.All(ctx, &results)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, results)
+
+}
