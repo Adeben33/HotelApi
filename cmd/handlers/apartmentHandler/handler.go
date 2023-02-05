@@ -386,3 +386,43 @@ func GetApartmentAmenities(c *gin.Context) {
 
 	c.JSON(http.StatusOK, apartment.Amenities)
 }
+
+func UpdateApartmentAmenities(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var amenities []string
+	apartmentId := c.Param("apartmentId")
+
+	if err := c.ShouldBindJSON(&amenities); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	filter := bson.M{"apartment_id": apartmentId}
+
+	upsert := true
+	opts := options.UpdateOptions{
+		ArrayFilters:             nil,
+		BypassDocumentValidation: nil,
+		Collation:                nil,
+		Comment:                  nil,
+		Hint:                     nil,
+		Upsert:                   &upsert,
+		Let:                      nil,
+	}
+
+	update := bson.D{{
+		"$push", bson.D{{
+			"amenities", amenities,
+		},
+		},
+	}}
+
+	updateResult, updateErr := apartmentCollection.UpdateOne(ctx, filter, update, &opts)
+	if updateErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": updateErr.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, updateResult)
+}

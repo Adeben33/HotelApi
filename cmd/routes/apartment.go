@@ -59,23 +59,29 @@ func ApartmentRoutes(route *gin.Engine) {
 	//route.GET("/apartments/:id/upcomingBo0king", apartmentHandler.ApartmentUpcomingBooking())
 
 	//Retrieve all amenities for a specific apartment.
-	route.GET("/apartments/:id/amenities", apartmentHandler.GetApartmentAmenities())
+	route.GET("/apartments/:apartmentId/amenities", apartmentHandler.GetApartmentAmenities)
 
-	////Update amenities for a specific apartment.
-	//route.PUT("/apartments/:id/amenities", apartmentHandler.UpdateApartmentAmenities())
+	//Update amenities for a specific apartment.
+	route.PUT("/apartments/:apartmentId/amenities", apartmentHandler.UpdateApartmentAmenities)
+
 	////Retrieve the availability status of a specific apartment eg available, booked etc
 	//route.GET("/apartments/:id/propertyAvailability", apartmentHandler.GetApartmentAmenities())
-	////Retrieve a list of apartments based on a specific property type (e.g. house, apartment, etc.).
+
 	////Retrieve the total price for a specific apartment based on a specific date range.
 	//route.GET("/apartments/:id/totalPrice", apartmentHandler.GetApartmenTotalPrice())
+
 	////Retrieve the check-in and check-out time for a specific apartment.
 	//route.GET("/apartments/:id/checkInCheckOut", apartmentHandler.GetApartmenCheckInCheckOut())
+
 	////Update the check-in and check-out time for a specific
 	//route.PUT("/apartments/:id/checkInCheckOut", apartmentHandler.GetApartmenCheckInCheckOut())
+
 	////Retrieve the booking calendar for a specific apartment.
 	//route.GET("/apartments/:id/bookingCalender", apartmentHandler.GetApartmenBookingCalender())
+
 	//// Retrieve the location of a specific apartment.
 	//route.GET("/apartments/:id/propertyLocation", apartmentHandler.GetApartmenLocation())
+
 	////Update the location of a specific apartment.
 	//route.PUT("/apartments/:id/propertyLocation", apartmentHandler.UpdateApartmenLocation())
 
