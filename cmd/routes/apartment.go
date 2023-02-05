@@ -42,20 +42,25 @@ func ApartmentRoutes(route *gin.Engine) {
 
 	////Retrieve all images for a specific apartment.
 	//route.GET("/apartments/:id/images", apartmentHandler.ApartmentImages())
+
 	////Upload new images for a specific apartment./upload picture for the apartment
 	//route.POST("/apartments/:id/images", apartmentHandler.UploadApartmentImage())
+
 	////	Retrieve a list of apartments with a specific rating range.
 	//route.GET("/apartments", apartmentHandler.GetApartmentWithRatings())
+
 	//// Retrieve the average rating for a specific apartment.
 	//route.GET("/apartments/:id/averageRating", apartmentHandler.ApartmentAverageRating())
+
 	////Retrieve the last booking for a specific apartment.
 	//route.GET("/apartments/:id/lastBooking", apartmentHandler.ApartmentLastBooking())
+
 	////Retrieve upcoming bookings for a specific apartment.
 	//route.GET("/apartments/:id/upcomingBo0king", apartmentHandler.ApartmentUpcomingBooking())
-	////Retrieve a list of apartments based on a specific location (e.g. by latitude and longitude).
-	//route.GET("/apartments", handlers.GetApartmentInALocation())
-	////Retrieve all amenities for a specific apartment.
-	//route.GET("/apartments/:id/amenities", apartmentHandler.GetApartmentAmenities())
+
+	//Retrieve all amenities for a specific apartment.
+	route.GET("/apartments/:id/amenities", apartmentHandler.GetApartmentAmenities())
+
 	////Update amenities for a specific apartment.
 	//route.PUT("/apartments/:id/amenities", apartmentHandler.UpdateApartmentAmenities())
 	////Retrieve the availability status of a specific apartment eg available, booked etc

@@ -369,3 +369,20 @@ func GetAllApartmentBookings(c *gin.Context) {
 	c.JSON(http.StatusOK, bookings)
 
 }
+
+func GetApartmentAmenities(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var apartment entity.Apartment
+
+	apartmentId := c.Param("apartmentId")
+
+	filter := bson.M{"apartment_id": apartmentId}
+	findErr := apartmentCollection.FindOne(ctx, filter).Decode(apartment)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, apartment.Amenities)
+}
