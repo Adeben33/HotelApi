@@ -24,10 +24,13 @@ func ApartmentRoutes(route *gin.Engine) {
 
 	//	Retrieve a list of apartments rented by a specific user
 	route.GET("/apartments", apartmentHandler.GetRentedApartment)
+
 	////	Retrieve a list of apartments within a specific price range.
 	//route.GET("/apartments", apartmentHandler.GetApartmentWithPrice())
+
 	////Retrieve a list of apartments with a specific number of bedrooms.
 	//route.GET("/apartments", apartmentHandler.GetApartmentWithNumberofBedrooms())
+
 	////Retrieve a list of apartments that are available on a specific date range.
 	//route.GET("/apartments", apartmentHandler.GetAvailableApartments())
 	////Retrieve all bookings for a specific apartment.

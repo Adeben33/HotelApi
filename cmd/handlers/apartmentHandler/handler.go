@@ -265,6 +265,22 @@ func GetAllReviews(c *gin.Context) {
 }
 
 func GetRentedApartment(c *gin.Context) {
-	ctx, cancel := context.
-		c.Param("userId")
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+
+	renterId := c.Param("userId")
+	filter := bson.M{"renter_id": renterId}
+
+	cursor, findErr := apartmentCollection.Find(ctx, filter)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		return
+	}
+	var results []bson.M
+	err := cursor.All(ctx, &results)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, results)
 }
