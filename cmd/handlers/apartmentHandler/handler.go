@@ -535,3 +535,53 @@ func ApartmentUpcomingBooking(c *gin.Context) {
 		"UpcomingBooking": UpcomingBooking,
 	})
 }
+
+func GetApartmentWithPrice(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+
+	low, _ := strconv.Atoi(c.Query("low"))
+	high, _ := strconv.Atoi(c.Query("high"))
+
+	filter := bson.M{"$and": []bson.M{
+		{
+			"price": bson.M{
+				"$geq": low,
+			},
+		},
+		{
+			"price": bson.M{
+				"$leq": high,
+			},
+		},
+	}}
+
+	//	Pagination will be used since there can be more with the process the list
+
+	page, _ := strconv.Atoi(c.Query("Page"))
+
+	if page < 1 {
+		page = 1
+	}
+
+	perPage := int64(9)
+	skippingLimit := int64(page-1) * perPage
+
+	findOptions := options.Find()
+	findOptions.SetLimit(perPage)
+	findOptions.SetSkip(skippingLimit)
+
+	cursor, findErr := apartmentCollection.Find(ctx, filter, findOptions)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		return
+	}
+
+	var results []bson.M
+	findErr = cursor.All(ctx, &results)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, results)
+}

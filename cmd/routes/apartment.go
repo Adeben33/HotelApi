@@ -25,8 +25,9 @@ func ApartmentRoutes(route *gin.Engine) {
 	//	Retrieve a list of apartments rented by a specific user
 	route.GET("/apartments", apartmentHandler.GetRentedApartment)
 
-	////	Retrieve a list of apartments within a specific price range.
-	//route.GET("/apartments", apartmentHandler.GetApartmentWithPrice())
+	//	Retrieve a list of apartments within a specific price range.
+	//querry will be used here
+	route.GET("/apartments", apartmentHandler.GetApartmentWithPrice)
 
 	//Retrieve a list of apartments with a specific number of bedrooms.
 	route.GET("/apartments", apartmentHandler.GetApartmentWithNumberofBedrooms)
@@ -71,7 +72,7 @@ func ApartmentRoutes(route *gin.Engine) {
 	//route.GET("/apartments/:id/totalPrice", apartmentHandler.GetApartmenTotalPrice())
 
 	////Retrieve the check-in and check-out time for a specific apartment.
-	//route.GET("/apartments/:id/checkInCheckOut", apartmentHandler.GetApartmenCheckInCheckOut())
+	//route.GET("/apartments/:id/checkInCheckOut", apartmentHandler.GetApartmenCheckInCheckOut)
 
 	////Update the check-in and check-out time for a specific
 	//route.PUT("/apartments/:id/checkInCheckOut", apartmentHandler.GetApartmenCheckInCheckOut())
