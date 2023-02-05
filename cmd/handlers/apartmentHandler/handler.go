@@ -2,6 +2,7 @@ package apartmentHandler
 
 import (
 	"context"
+	"fmt"
 	"github.com/adeben33/HotelApi/internals/dataBaseStore/mongoDBConnection"
 	"github.com/adeben33/HotelApi/internals/entity"
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ import (
 var validate = validator.New()
 var apartmentCollection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "apartment")
 var reviewCollection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "review")
+var bookingCollection = mongoDBConnection.OpenCollection(mongoDBConnection.Client, "booking")
 
 func GetApartment(c *gin.Context) {
 	var apartment entity.ApartmentRes
@@ -283,4 +285,87 @@ func GetRentedApartment(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, results)
+}
+
+func GetApartmentWithNumberofBedrooms(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+
+	var apartments []entity.ApartmentRes
+
+	numberOfRooms, _ := strconv.Atoi(c.Query("numberOfRooms"))
+	if numberOfRooms < 1 {
+		msg := fmt.Sprintf("Invalid room numbers")
+		c.JSON(http.StatusBadRequest, msg)
+		return
+	}
+	page, _ := strconv.Atoi(c.Param("page"))
+	if page < 1 {
+		page = 1
+	}
+	filter := bson.M{"numberof_rooms": numberOfRooms}
+	findOptions := options.Find()
+	var perPage int64 = 9
+
+	skippingLimit := int64(page-1) * perPage
+	findOptions.SetSkip(skippingLimit)
+	findOptions.SetLimit(perPage)
+
+	cursor, findErr := apartmentCollection.Find(ctx, filter, findOptions)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		return
+	}
+
+	count, _ := apartmentCollection.CountDocuments(ctx, filter)
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var apartment entity.Apartment
+		var apartmentRes entity.ApartmentRes
+		cursor.Decode(&apartment)
+
+		apartmentRes.NumberofRooms = apartment.NumberofRooms
+		apartmentRes.Price = apartment.Price
+		apartmentRes.Images = apartment.Images
+		apartmentRes.Name = apartment.Name
+		apartmentRes.UpdatedAt = apartment.UpdatedAt
+		apartmentRes.CreatedAt = apartment.CreatedAt
+		apartmentRes.Address = apartment.Address
+		apartmentRes.Amenities = apartment.Amenities
+		apartmentRes.Review = apartment.Review
+
+		apartments = append(apartments, apartmentRes)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"Data":  apartments,
+		"count": count,
+	})
+}
+
+func GetAllApartmentBookings(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var apartment entity.Apartment
+
+	apartmentId := c.Param("apartmentId")
+
+	filter := bson.M{"apartment_id": apartmentId}
+	findErr := apartmentCollection.FindOne(ctx, filter).Decode(apartment)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		return
+	}
+	var bookings []entity.Bookings
+	for _, bookingId := range apartment.BookingsId {
+		var booking entity.Bookings
+		findErr := bookingCollection.FindOne(ctx, bson.M{"booking_id": bookingId}).Decode(&booking)
+		if findErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		}
+		bookings = append(bookings, booking)
+	}
+	c.JSON(http.StatusOK, bookings)
+
 }

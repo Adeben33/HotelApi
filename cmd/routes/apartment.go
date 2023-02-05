@@ -28,15 +28,18 @@ func ApartmentRoutes(route *gin.Engine) {
 	////	Retrieve a list of apartments within a specific price range.
 	//route.GET("/apartments", apartmentHandler.GetApartmentWithPrice())
 
-	////Retrieve a list of apartments with a specific number of bedrooms.
-	//route.GET("/apartments", apartmentHandler.GetApartmentWithNumberofBedrooms())
+	//Retrieve a list of apartments with a specific number of bedrooms.
+	route.GET("/apartments", apartmentHandler.GetApartmentWithNumberofBedrooms)
 
 	////Retrieve a list of apartments that are available on a specific date range.
 	//route.GET("/apartments", apartmentHandler.GetAvailableApartments())
-	////Retrieve all bookings for a specific apartment.
-	//route.GET("/apartments/:id/bookings", apartmentHandler.GetAllApartmentBookings)
+
+	//Retrieve all bookings for a specific apartment.
+	route.GET("/apartments/:apartmentId/bookings", apartmentHandler.GetAllApartmentBookings)
+
 	////Create a new booking for a specific apartment.
 	//route.POST("/apartments/:id/bookings", apartmentHandler.CreateBooking)
+
 	////Retrieve all images for a specific apartment.
 	//route.GET("/apartments/:id/images", apartmentHandler.ApartmentImages())
 	////Upload new images for a specific apartment./upload picture for the apartment
