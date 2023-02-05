@@ -462,3 +462,36 @@ func ApartmentAverageRating(c *gin.Context) {
 		"Average Review": average,
 	})
 }
+
+func ApartmentLastBooking(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	//This will be sorted by the id in the decreasing order and the first will be last booking
+	var apartment entity.Apartment
+	filter := bson.M{"apartment": apartment}
+	findOption := options.Find()
+	findOption.SetSort(
+		bson.M{
+			"_id": -1,
+		},
+	)
+	findOption.SetLimit(1)
+
+	cursor, findErr := bookingCollection.Find(ctx, filter, findOption)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, findErr.Error())
+		return
+	}
+	defer cursor.Close(ctx)
+	var bookings []entity.Bookings
+	for cursor.Next(ctx) {
+		var booking entity.Bookings
+		cursor.Decode(&booking)
+		bookings = append(bookings, booking)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"apartment Name": apartment.Name,
+		"last Booking":   bookings,
+	})
+}

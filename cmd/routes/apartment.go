@@ -52,14 +52,14 @@ func ApartmentRoutes(route *gin.Engine) {
 	// Retrieve the average rating for a specific apartment.
 	route.GET("/apartments/:apartmentId/averageRating", apartmentHandler.ApartmentAverageRating)
 
-	////Retrieve the last booking for a specific apartment.
-	//route.GET("/apartments/:id/lastBooking", apartmentHandler.ApartmentLastBooking())
+	//Retrieve the last booking for a specific apartment.
+	route.GET("/apartments/:id/lastBooking", apartmentHandler.ApartmentLastBooking)
 
 	////Retrieve upcoming bookings for a specific apartment.
 	//route.GET("/apartments/:id/upcomingBo0king", apartmentHandler.ApartmentUpcomingBooking())
 
 	//Retrieve all amenities for a specific apartment.
-	//route.GET("/apartments/:apartmentId/amenities", apartmentHandler.GetApartmentAmenities)
+	route.GET("/apartments/:apartmentId/amenities", apartmentHandler.GetApartmentAmenities)
 
 	//Update amenities for a specific apartment.
 	route.PUT("/apartments/:apartmentId/amenities", apartmentHandler.UpdateApartmentAmenities)
