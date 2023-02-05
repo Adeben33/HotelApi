@@ -47,10 +47,10 @@ func ApartmentRoutes(route *gin.Engine) {
 	//route.POST("/apartments/:id/images", apartmentHandler.UploadApartmentImage())
 
 	////	Retrieve a list of apartments with a specific rating range.
-	//route.GET("/apartments", apartmentHandler.GetApartmentWithRatings())
+	//route.GET("/apartments", apartmentHandler.GetApartmentWithRatings)
 
-	//// Retrieve the average rating for a specific apartment.
-	//route.GET("/apartments/:id/averageRating", apartmentHandler.ApartmentAverageRating())
+	// Retrieve the average rating for a specific apartment.
+	route.GET("/apartments/:apartmentId/averageRating", apartmentHandler.ApartmentAverageRating)
 
 	////Retrieve the last booking for a specific apartment.
 	//route.GET("/apartments/:id/lastBooking", apartmentHandler.ApartmentLastBooking())
@@ -59,7 +59,7 @@ func ApartmentRoutes(route *gin.Engine) {
 	//route.GET("/apartments/:id/upcomingBo0king", apartmentHandler.ApartmentUpcomingBooking())
 
 	//Retrieve all amenities for a specific apartment.
-	route.GET("/apartments/:apartmentId/amenities", apartmentHandler.GetApartmentAmenities)
+	//route.GET("/apartments/:apartmentId/amenities", apartmentHandler.GetApartmentAmenities)
 
 	//Update amenities for a specific apartment.
 	route.PUT("/apartments/:apartmentId/amenities", apartmentHandler.UpdateApartmentAmenities)

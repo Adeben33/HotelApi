@@ -426,3 +426,39 @@ func UpdateApartmentAmenities(c *gin.Context) {
 
 	c.JSON(http.StatusOK, updateResult)
 }
+
+func ApartmentAverageRating(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var reviews []entity.Reviews
+	var apartment entity.Apartment
+
+	apartmentId := c.Param("apartmentId")
+
+	findErr := apartmentCollection.FindOne(ctx, bson.M{"apartmentId": apartmentId}).Decode(&apartment)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, findErr.Error())
+		return
+	}
+
+	filter := bson.M{"apartment_id": apartmentId}
+
+	cursor, findErr := reviewCollection.Find(ctx, filter)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, findErr.Error())
+		return
+	}
+	defer cursor.Close(ctx)
+	var rating uint8 = 0
+	for cursor.Next(ctx) {
+		var review entity.Reviews
+		cursor.Decode(&review)
+		rating += review.Rating
+		reviews = append(reviews, review)
+	}
+	average := rating / uint8(len(reviews))
+	c.JSON(http.StatusOK, gin.H{
+		"Apartment":      apartment.Name,
+		"Average Review": average,
+	})
+}
