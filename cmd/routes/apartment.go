@@ -55,8 +55,8 @@ func ApartmentRoutes(route *gin.Engine) {
 	//Retrieve the last booking for a specific apartment.
 	route.GET("/apartments/:id/lastBooking", apartmentHandler.ApartmentLastBooking)
 
-	////Retrieve upcoming bookings for a specific apartment.
-	//route.GET("/apartments/:id/upcomingBo0king", apartmentHandler.ApartmentUpcomingBooking())
+	//Retrieve upcoming bookings for a specific apartment.
+	route.GET("/apartments/:apartmentId/upcomingBo0king", apartmentHandler.ApartmentUpcomingBooking)
 
 	//Retrieve all amenities for a specific apartment.
 	route.GET("/apartments/:apartmentId/amenities", apartmentHandler.GetApartmentAmenities)

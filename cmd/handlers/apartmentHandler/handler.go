@@ -495,3 +495,43 @@ func ApartmentLastBooking(c *gin.Context) {
 		"last Booking":   bookings,
 	})
 }
+
+func ApartmentUpcomingBooking(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var apartment entity.Apartment
+	var bookings []entity.Bookings
+
+	apartmentID := c.Param("apartmentId")
+	filter := bson.M{"apartment_id": apartmentID}
+	findErr := apartmentCollection.FindOne(ctx, filter).Decode(&apartment)
+	if findErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": findErr.Error()})
+		return
+	}
+
+	//	this will get all the booking for he specific apartment
+	cursor, findErr := bookingCollection.Find(ctx, filter)
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var booking entity.Bookings
+		cursor.Decode(&booking)
+		bookings = append(bookings, booking)
+	}
+
+	//	This will filter for upcoming bookings
+	var UpcomingBooking []entity.Bookings
+
+	//	loop over the bookings
+
+	for _, booking := range bookings {
+		if booking.StartDate.After(time.Now()) {
+			UpcomingBooking = append(UpcomingBooking, booking)
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"Apartment":       apartment.Name,
+		"UpcomingBooking": UpcomingBooking,
+	})
+}
